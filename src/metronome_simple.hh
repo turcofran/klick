@@ -39,8 +39,8 @@ class MetronomeSimple
 
     void set_all(TempoMap::Entry const & params);
 
-    void tap(double now);
-    void tap();
+    virtual void tap(double now);
+    //virtual void tap();
 
     float tempo() const { return _tempo; }
     float tempo_increment() const { return _tempo_increment; }
@@ -58,10 +58,6 @@ class MetronomeSimple
 
   private:
 
-    static int const MAX_TAPS = 5;
-    static float constexpr MAX_TAP_AGE = 3.0f;
-    static float constexpr TAP_DIFF = 0.2f;
-
     float _tempo;
     float _tempo_increment;
     float _tempo_start;
@@ -75,7 +71,6 @@ class MetronomeSimple
     nframes_t _next;
     int _beat;
 
-    std::deque<double> _taps;
     nframes_t _prev;
     bool _tapped;
 };

@@ -15,9 +15,7 @@
 
 #include <sys/time.h>
 #include <time.h>
-
 #include "util/debug.hh"
-
 
 MetronomeSimple::MetronomeSimple(AudioInterface & audio, TempoMap::Entry const * params)
   : Metronome(audio)
@@ -31,7 +29,6 @@ MetronomeSimple::MetronomeSimple(AudioInterface & audio, TempoMap::Entry const *
   , _frame(0)
   , _next(0)
   , _beat(0)
-  , _tapped(false)
 {
     if (params) {
         set_all(*params);
@@ -116,27 +113,9 @@ void MetronomeSimple::do_stop()
     _current_tempo = 0.0f;
 }
 
-
 void MetronomeSimple::tap(double now)
 {
-    if (_taps.size() && now < _taps.back()) {
-        // distortion in space-time continuum
-        _taps.clear();
-    }
-
-    _taps.push_back(now);
-
-    if (static_cast<int>(_taps.size()) > MAX_TAPS) {
-        _taps.pop_front();
-    }
-
-    // forget taps which happened too long ago
-    _taps.erase(
-        std::remove_if(_taps.begin(), _taps.end(),
-                       [&](double t){ return t < now - MAX_TAP_AGE; }),
-        _taps.end()
-    );
-
+    update_taps(now);
     if (_taps.size() > 1) {
         _tempo = 60.0f * (_taps.size() - 1) / (_taps.back() - _taps.front());
         if (active()) {
@@ -144,16 +123,6 @@ void MetronomeSimple::tap(double now)
             _tapped = true;
         }
     }
-}
-
-
-void MetronomeSimple::tap()
-{
-    ::timeval tv;
-    ::gettimeofday(&tv, NULL);
-    double now = tv.tv_sec + 1.e-6 * tv.tv_usec;
-
-    tap(now);
 }
 
 

@@ -345,8 +345,9 @@ void Options::parse(int argc, char *argv[])
 
     // determine metronome type
     type = output_filename.length() ? METRONOME_TYPE_MAP :
+           transport_master ?  METRONOME_TYPE_MAP :
            interactive ? METRONOME_TYPE_SIMPLE :
-           use_osc ? METRONOME_TYPE_SIMPLE :
            follow_transport ? METRONOME_TYPE_JACK :
+           use_osc ? METRONOME_TYPE_SIMPLE :
            METRONOME_TYPE_MAP;
 }

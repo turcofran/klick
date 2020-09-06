@@ -102,6 +102,9 @@ class OSCHandler
 
     void on_jack_query(Message const &);
 
+    void on_map_set_map(Message const &);
+    void on_map_tap(Message const &);
+
     void fallback(Message const &);
 
 

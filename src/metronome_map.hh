@@ -46,6 +46,10 @@ class MetronomeMap
     virtual void process_callback(sample_t *, nframes_t);
     virtual void timebase_callback(position_t *);
 
+    virtual void tap(double now);
+    //virtual void tap();
+    void set_map(int, int, float);
+
   private:
     static int const TICKS_PER_BEAT = 1920;
 
@@ -54,6 +58,8 @@ class MetronomeMap
 
     // position in tempomap
     Position _pos;
+    Position _new_pos;
+    bool _new_map_requested;
 
     bool _transport_enabled;
 };

@@ -11,9 +11,10 @@
 
 #include "metronome.hh"
 #include "audio_interface_jack.hh"
-
+#include <algorithm>
 #include "util/debug.hh"
-
+#include <sys/time.h>
+#include <time.h>
 
 Metronome::Metronome(AudioInterface & audio)
   : _audio(audio)
@@ -39,6 +40,31 @@ void Metronome::set_sound(AudioChunkConstPtr emphasis, AudioChunkConstPtr normal
     _click_normal = normal;
 }
 
+
+void Metronome::tap()
+{
+    ::timeval tv;
+    ::gettimeofday(&tv, NULL);
+    double now = tv.tv_sec + 1.e-6 * tv.tv_usec;
+    tap(now);
+}
+
+void Metronome::update_taps(double now){
+  if (_taps.size() && now < _taps.back()) {
+      // distortion in space-time continuum
+      _taps.clear();
+  }
+  _taps.push_back(now);
+  if (static_cast<int>(_taps.size()) > MAX_TAPS) {
+      _taps.pop_front();
+  }
+  // forget taps which happened too long ago
+  _taps.erase(
+      std::remove_if(_taps.begin(), _taps.end(),
+                     [&](double t){ return t < now - MAX_TAP_AGE; }),
+      _taps.end()
+  );
+}
 
 void Metronome::play_click(bool emphasis, nframes_t offset, float volume)
 {

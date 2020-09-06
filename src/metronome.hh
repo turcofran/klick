@@ -18,6 +18,8 @@
 
 #include <boost/noncopyable.hpp>
 
+#include <vector>
+#include <deque>
 
 /*
  * abstract metronome base class
@@ -46,6 +48,10 @@ class Metronome
 
     virtual bool running() const = 0;
 
+    void tap();
+    void update_taps(double );
+    virtual void tap(double /*now*/)  { }
+
   protected:
 
     void play_click(bool emphasis, nframes_t offset, float volume = 1.0f);
@@ -54,6 +60,11 @@ class Metronome
 
     AudioChunkConstPtr _click_emphasis;
     AudioChunkConstPtr _click_normal;
+
+    static int const MAX_TAPS = 5;
+    static float constexpr MAX_TAP_AGE = 3.0f;
+    static float constexpr TAP_DIFF = 0.2f;
+    std::deque<double> _taps;
 
   private:
 

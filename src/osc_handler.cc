@@ -87,6 +87,9 @@ OSCHandler::OSCHandler(std::string const & port,
     add_method<MetronomeJack>("/klick/jack/query", "", &OSCHandler::on_jack_query);
     add_method<MetronomeJack>("/klick/jack/query", "s", &OSCHandler::on_jack_query);
 
+    add_method<MetronomeMap>("/klick/map/set_map", "iif", &OSCHandler::on_map_set_map);
+    add_method<MetronomeMap>("/klick/map/tap", "", &OSCHandler::on_map_tap);
+
     add_method(NULL, NULL, &OSCHandler::fallback);
 
     if (!return_port.empty()) {
@@ -94,6 +97,23 @@ OSCHandler::OSCHandler(std::string const & port,
     }
 }
 
+
+void OSCHandler::on_map_set_map(Message const & msg)
+{
+    auto m = metro_map();
+    m->set_map(boost::get<int>(msg.args[0]),
+      boost::get<int>(msg.args[1]),
+      boost::get<float>(msg.args[2]));
+    //_osc->send(_clients, "/klick/map/current_map",msg);
+}
+
+void OSCHandler::on_map_tap(Message const & /*msg*/)
+{
+    auto m = metro_map();
+    std::dynamic_pointer_cast<Metronome>(m)->tap();
+    // TODO send info
+    //_osc->send(_clients, "/klick/map/current_map",getmap);
+}
 
 OSCHandler::~OSCHandler()
 {
@@ -466,7 +486,7 @@ void OSCHandler::on_simple_tap(Message const & msg)
     if (!msg.args.empty()) {
         m->tap(boost::get<double>(msg.args[0]));
     } else {
-        m->tap();
+        std::dynamic_pointer_cast<Metronome>(m)->tap();
     }
     _osc->send(_clients, "/klick/simple/tempo", m->tempo());
 }

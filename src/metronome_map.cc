@@ -14,7 +14,8 @@
 #include "audio_interface_jack.hh"
 #include "audio_chunk.hh"
 #include "tempomap.hh"
-
+#include <sys/time.h>
+#include <time.h>
 #include <jack/jack.h>
 #include <jack/transport.h>
 
@@ -32,6 +33,8 @@ MetronomeMap::MetronomeMap(
   : Metronome(audio)
   , _frame(0)
   , _pos(tempomap, audio.samplerate(), tempo_multiplier)
+  , _new_pos(tempomap, audio.samplerate(), tempo_multiplier)
+  , _new_map_requested(false)
   , _transport_enabled(transport)
 {
     ASSERT(tempomap);
@@ -47,7 +50,6 @@ MetronomeMap::MetronomeMap(
         _pos.add_preroll(preroll);
     }
 }
-
 
 MetronomeMap::~MetronomeMap()
 {
@@ -126,9 +128,28 @@ void MetronomeMap::process_callback(sample_t * /*buffer*/, nframes_t nframes)
     _frame += nframes;
 }
 
+void MetronomeMap::tap(double now)
+{
+    update_taps(now);
+
+    if (_taps.size() > 1) {
+        double new_tempo = 60.0f * (_taps.size() - 1) / (_taps.back() - _taps.front());
+        TempoMap::Entry const & e = _pos.current_entry();
+        set_map(e.beats, e.denom, new_tempo);
+    }
+}
+
+void MetronomeMap::set_map(int beats, int denom, float tempo){
+  // TODO protect this from beign read whilst it's updated, and from this beigh called from a different thread too
+  TempoMapConstPtr map = TempoMap::new_simple(-1, tempo, beats, denom);
+   _new_pos = Position(map, _audio.samplerate(), 1);
+   _new_map_requested = true;
+}
+
 
 void MetronomeMap::timebase_callback(position_t *p)
 {
+
     if (p->frame != _frame) {
         // current position doesn't match jack transport frame.
         // assume we're wrong and jack is right ;)
@@ -140,6 +161,14 @@ void MetronomeMap::timebase_callback(position_t *p)
         // end of tempomap, no valid position
         p->valid = (jack_position_bits_t)0;
         return;
+    }
+
+    // TODO protect this with a lock
+    if (_new_map_requested){
+      _pos = _new_pos;
+      _new_map_requested=false;
+      _pos.locate(p->frame);
+      _frame = p->frame;
     }
 
     // get the current tempomap entry
