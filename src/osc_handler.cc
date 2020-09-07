@@ -104,15 +104,14 @@ void OSCHandler::on_map_set_map(Message const & msg)
     m->set_map(boost::get<int>(msg.args[0]),
       boost::get<int>(msg.args[1]),
       boost::get<float>(msg.args[2]));
-    //_osc->send(_clients, "/klick/map/current_map",msg);
+    _osc->send(_clients, "/klick/map/next_map",m->get_next_map_str());
 }
 
 void OSCHandler::on_map_tap(Message const & /*msg*/)
 {
     auto m = metro_map();
     std::dynamic_pointer_cast<Metronome>(m)->tap();
-    // TODO send info
-    //_osc->send(_clients, "/klick/map/current_map",getmap);
+    _osc->send(_clients, "/klick/map/next_map",m->get_next_map_str());
 }
 
 OSCHandler::~OSCHandler()

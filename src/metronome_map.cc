@@ -131,7 +131,6 @@ void MetronomeMap::process_callback(sample_t * /*buffer*/, nframes_t nframes)
 void MetronomeMap::tap(double now)
 {
     update_taps(now);
-
     if (_taps.size() > 1) {
         double new_tempo = 60.0f * (_taps.size() - 1) / (_taps.back() - _taps.front());
         TempoMap::Entry const & e = _pos.current_entry();
@@ -146,6 +145,15 @@ void MetronomeMap::set_map(int beats, int denom, float tempo){
     _new_map_requested = true;
     _newposrex_mtx.unlock();
 }
+
+std::string MetronomeMap::get_next_map_str(){
+    TempoMap::Entry const & e = _new_pos.current_entry();
+    std::string os = ""+ std::to_string(e.beats) + " " +
+      std::to_string(e.denom) + " " +
+      std::to_string(int(e.tempo));
+    return os;
+}
+
 
 void MetronomeMap::timebase_callback(position_t *p)
 {
