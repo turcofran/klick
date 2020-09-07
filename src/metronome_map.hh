@@ -15,6 +15,7 @@
 #include "metronome.hh"
 #include "tempomap.hh"
 #include "position.hh"
+#include <mutex>
 
 #include <string>
 
@@ -60,6 +61,7 @@ class MetronomeMap
     Position _pos;
     Position _new_pos;
     bool _new_map_requested;
+    std::mutex _newposrex_mtx;
 
     bool _transport_enabled;
 };

@@ -140,12 +140,12 @@ void MetronomeMap::tap(double now)
 }
 
 void MetronomeMap::set_map(int beats, int denom, float tempo){
-  // TODO protect this from beign read whilst it's updated, and from this beigh called from a different thread too
-  TempoMapConstPtr map = TempoMap::new_simple(-1, tempo, beats, denom);
-   _new_pos = Position(map, _audio.samplerate(), 1);
-   _new_map_requested = true;
+    TempoMapConstPtr map = TempoMap::new_simple(-1, tempo, beats, denom);
+    _newposrex_mtx.lock();
+    _new_pos = Position(map, _audio.samplerate(), 1);
+    _new_map_requested = true;
+    _newposrex_mtx.unlock();
 }
-
 
 void MetronomeMap::timebase_callback(position_t *p)
 {
@@ -165,10 +165,14 @@ void MetronomeMap::timebase_callback(position_t *p)
 
     // TODO protect this with a lock
     if (_new_map_requested){
-      _pos = _new_pos;
-      _new_map_requested=false;
-      _pos.locate(p->frame);
-      _frame = p->frame;
+        // This lock suppose this callback doesn't reenter and the
+        // other locked blocks will be fast enough
+        _newposrex_mtx.lock();
+        _pos = _new_pos;
+        _new_map_requested=false;
+        _newposrex_mtx.unlock();
+        _pos.locate(p->frame);
+        _frame = p->frame;
     }
 
     // get the current tempomap entry
