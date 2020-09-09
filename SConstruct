@@ -1,7 +1,7 @@
 import os
 import SCons.Util
 
-version = '0.13.0-pre'
+version = '0.14.0-pre'
 
 env = Environment(
     CPPDEFINES = [
@@ -23,7 +23,7 @@ if os.environ.has_key('LDFLAGS'):
 # build options
 opts = Variables('scache.conf')
 opts.AddVariables(
-    PathVariable('PREFIX', 'install prefix', '/usr/local'),
+    PathVariable('PREFIX', 'install prefix', '/usr/'),
     PathVariable('DESTDIR', 'intermediate install prefix', '', PathVariable.PathAccept),
     BoolVariable('DEBUG', 'debug mode', False),
     BoolVariable('OSC', 'OSC support', True),

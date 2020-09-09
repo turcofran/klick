@@ -158,7 +158,17 @@ std::string MetronomeMap::get_next_map_str(){
 void MetronomeMap::timebase_callback(position_t *p)
 {
 
-    if (p->frame != _frame) {
+    if (_new_map_requested){
+        // This lock suppose this callback doesn't reenter and the
+        // other locked blocks will be fast enough
+        _newposrex_mtx.lock();
+        _pos = _new_pos;
+        _new_map_requested=false;
+        _newposrex_mtx.unlock();
+        _pos.locate(p->frame);
+        _frame = p->frame;
+    }
+    else if (p->frame != _frame) {
         // current position doesn't match jack transport frame.
         // assume we're wrong and jack is right ;)
         _frame = p->frame;
@@ -171,17 +181,6 @@ void MetronomeMap::timebase_callback(position_t *p)
         return;
     }
 
-    // TODO protect this with a lock
-    if (_new_map_requested){
-        // This lock suppose this callback doesn't reenter and the
-        // other locked blocks will be fast enough
-        _newposrex_mtx.lock();
-        _pos = _new_pos;
-        _new_map_requested=false;
-        _newposrex_mtx.unlock();
-        _pos.locate(p->frame);
-        _frame = p->frame;
-    }
 
     // get the current tempomap entry
     TempoMap::Entry const & e = _pos.current_entry();
