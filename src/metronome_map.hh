@@ -51,6 +51,8 @@ class MetronomeMap
     //virtual void tap();
     void set_map(int, int, float);
     std::string get_next_map_str();
+    std::tuple<int, int, float> get_next_map() const;
+    std::tuple<int, int, float> get_current_map() const;
 
   private:
     static int const TICKS_PER_BEAT = 1920;

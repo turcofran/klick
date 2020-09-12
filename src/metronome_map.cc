@@ -154,6 +154,15 @@ std::string MetronomeMap::get_next_map_str(){
     return os;
 }
 
+std::tuple<int, int, float> MetronomeMap::get_next_map() const {
+    TempoMap::Entry const & e = _new_pos.current_entry();
+    return std::make_tuple(e.beats, e.denom, e.tempo);
+}
+
+std::tuple<int, int, float> MetronomeMap::get_current_map() const {
+    TempoMap::Entry const & e = _pos.current_entry();
+    return std::make_tuple(e.beats, e.denom, e.tempo);
+}
 
 void MetronomeMap::timebase_callback(position_t *p)
 {
