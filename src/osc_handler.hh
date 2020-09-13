@@ -102,6 +102,8 @@ class OSCHandler
 
     void on_jack_query(Message const &);
 
+    void on_map_set_tempo(Message const & msg);
+    void on_map_set_meter(Message const & msg);
     void on_map_set_map(Message const &);
     void on_map_tap(Message const &);
     void on_map_get_current(Message const & msg);

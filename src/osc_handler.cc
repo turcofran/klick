@@ -87,6 +87,8 @@ OSCHandler::OSCHandler(std::string const & port,
     add_method<MetronomeJack>("/klick/jack/query", "", &OSCHandler::on_jack_query);
     add_method<MetronomeJack>("/klick/jack/query", "s", &OSCHandler::on_jack_query);
 
+    add_method<MetronomeMap>("/klick/map/set_tempo", "f", &OSCHandler::on_map_set_tempo);
+    add_method<MetronomeMap>("/klick/map/set_meter", "ii", &OSCHandler::on_map_set_meter);
     add_method<MetronomeMap>("/klick/map/set_map", "iif", &OSCHandler::on_map_set_map);
     add_method<MetronomeMap>("/klick/map/tap", "", &OSCHandler::on_map_tap);
     add_method<MetronomeMap>("/klick/map/tap", "d", &OSCHandler::on_map_tap);
@@ -180,7 +182,7 @@ void OSCHandler::on_ping(Message const & msg)
 {
     auto addr = optional_address(msg);
 
-    std::cout << "ping from " << msg.src.url() << std::endl;
+    logv << "ping from " << msg.src.url() << std::endl;
     _osc->send(addr, "/klick/pong");
 }
 
@@ -536,15 +538,32 @@ void OSCHandler::on_map_get_current(Message const & msg)
                                                std::get<2>(m->get_current_map()));
 }
 
-void OSCHandler::on_map_set_map(Message const & msg)
+void OSCHandler::on_map_set_tempo(Message const & msg)
 {
     auto m = metro_map();
-    m->set_map(boost::get<int>(msg.args[0]),
-      boost::get<int>(msg.args[1]),
-      boost::get<float>(msg.args[2]));
+    m->set_tempo(boost::get<float>(msg.args[0]));
     _osc->send(_clients, "/klick/map/next_map", std::get<0>(m->get_next_map()),
                                                 std::get<1>(m->get_next_map()),
                                                 std::get<2>(m->get_next_map()));
+}
+void OSCHandler::on_map_set_meter(Message const & msg)
+{
+    auto m = metro_map();
+    m->set_meter(boost::get<int>(msg.args[0]),
+                 boost::get<int>(msg.args[1]));
+    _osc->send(_clients, "/klick/map/next_map", std::get<0>(m->get_next_map()),
+                                                std::get<1>(m->get_next_map()),
+                                                std::get<2>(m->get_next_map()));
+}
+void OSCHandler::on_map_set_map(Message const & msg)
+{
+   auto m = metro_map();
+   m->set_map(boost::get<int>(msg.args[0]),
+      boost::get<int>(msg.args[1]),
+      boost::get<float>(msg.args[2]));
+   _osc->send(_clients, "/klick/map/next_map", std::get<0>(m->get_next_map()),
+                                              std::get<1>(m->get_next_map()),
+                                              std::get<2>(m->get_next_map()));
 }
 
 void OSCHandler::on_map_tap(Message const & msg)

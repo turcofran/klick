@@ -138,7 +138,21 @@ void MetronomeMap::tap(double now)
     }
 }
 
+void MetronomeMap::set_tempo(float new_tempo)
+{
+    TempoMap::Entry const & e = _pos.current_entry();
+    set_map(e.beats, e.denom, new_tempo);
+}
+
+void MetronomeMap::set_meter(int beats, int denom)
+{
+    TempoMap::Entry const & e = _pos.current_entry();
+    set_map(beats, denom, e.tempo);
+}
+
 void MetronomeMap::set_map(int beats, int denom, float tempo){
+    tempo = tempo<TEMPO_MIN?TEMPO_MIN:
+            tempo>TEMPO_MAX?TEMPO_MAX:tempo;
     TempoMapConstPtr map = TempoMap::new_simple(-1, tempo, beats, denom);
     _newposrex_mtx.lock();
     _new_pos = Position(map, _audio.samplerate(), 1);
