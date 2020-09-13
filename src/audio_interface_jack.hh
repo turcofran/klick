@@ -51,6 +51,9 @@ class AudioInterfaceJack
     virtual nframes_t frame() const;
     virtual bool set_position(position_t const &);
     virtual bool set_frame(nframes_t);
+    virtual void start_transport() const;
+    virtual void stop_transport() const;
+
 
   private:
 

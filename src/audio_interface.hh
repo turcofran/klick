@@ -93,6 +93,9 @@ class AudioInterfaceTransport
     virtual nframes_t frame() const = 0;
     virtual bool set_position(position_t const &) = 0;
     virtual bool set_frame(nframes_t) = 0;
+    virtual void start_transport() const {}
+    virtual void stop_transport() const {}
+
 
   protected:
 

@@ -60,11 +60,15 @@ void MetronomeMap::do_start()
 {
     _pos.locate(0);
     _frame = 0;
+    AudioInterfaceJack *a = dynamic_cast<AudioInterfaceJack *>(&_audio);
+    a->start_transport();
 }
 
 
 void MetronomeMap::do_stop()
 {
+    AudioInterfaceJack *a = dynamic_cast<AudioInterfaceJack *>(&_audio);
+    a->stop_transport();
 }
 
 

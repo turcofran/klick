@@ -140,6 +140,16 @@ bool AudioInterfaceJack::transport_rolling() const
 }
 
 
+void AudioInterfaceJack::start_transport() const
+{
+    jack_transport_start(_client);
+}
+
+void AudioInterfaceJack::stop_transport() const
+{
+    jack_transport_stop(_client);
+}
+
 position_t AudioInterfaceJack::position() const
 {
     position_t pos;
