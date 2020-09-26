@@ -55,11 +55,12 @@ class MetronomeMap
     std::tuple<int, int, float> get_current_map() const;
     void set_tempo(float );
     void set_meter(int , int );
-    
+
   private:
     static int const TICKS_PER_BEAT = 1920;
     float const TEMPO_MIN = 20;
     float const TEMPO_MAX = 280;
+    float const MIN_TAP_TEMPO_DIFF = 1;
 
     // transport position
     nframes_t _frame;

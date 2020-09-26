@@ -138,7 +138,9 @@ void MetronomeMap::tap(double now)
     if (_taps.size() > 1) {
         double new_tempo = 60.0f * (_taps.size() - 1) / (_taps.back() - _taps.front());
         TempoMap::Entry const & e = _pos.current_entry();
-        set_map(e.beats, e.denom, new_tempo);
+        if (abs(new_tempo-e.tempo) > MIN_TAP_TEMPO_DIFF){
+          set_map(e.beats, e.denom, new_tempo);
+        }
     }
 }
 
